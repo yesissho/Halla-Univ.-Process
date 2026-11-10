@@ -2,5 +2,18 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "buildCommand": "node scripts/build-static.mjs",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/workmng",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/workmng",
+      "destination": "/index.html"
+    }
+  ]
 }
