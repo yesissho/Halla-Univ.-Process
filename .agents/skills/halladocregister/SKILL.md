@@ -7,7 +7,7 @@ description: Prepare a Halla SPOC records-ledger entry from user-provided values
 
 ## 고정 경로
 
-- 시작 주소는 `https://spoc.halla.ac.kr`로 고정한다.
+- 시작 주소는 `https://spoc.chu.ac.kr`로 고정한다.
 - 로그인 후 왼쪽 메뉴 **기록물등록대장**을 연다.
 - 목록에서 **추가**를 눌러 입력 행을 만든다.
 - 주소가 열리지 않거나 화면이 다르면 다른 주소나 메뉴를 임의로 대입하지 말고 멈춰 보고한다.
