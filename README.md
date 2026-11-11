@@ -29,3 +29,9 @@ npm test
 ```
 
 로컬 UI 미리보기는 `npm run dev -- --host 127.0.0.1 --port 4173`. 테스트용 SQLite는 `.sites-runtime/preview.sqlite`에만 생성됩니다. 실제 배포는 Sites가 D1과 마이그레이션을 연결합니다. 현재 서버 구현은 Sites/Cloudflare Worker용이며 Vercel의 정적 호스팅만으로는 인증·서버 저장 기능을 실행할 수 없습니다.
+
+## 스캔 문서 파일명 변경 도구
+
+[스캔 문서 이름 정리 v1.8](tools/scan-document-renamer/README.md)
+
+삼성 스캐너의 `SCAN_`으로 시작하는 파일명 형식에서, 첫 페이지에 **‘제목’이라고 명시된 항목이 있는 문서에 한해 제목 자동 추출을 통한 파일명 변경을 지원**합니다. 직접 제목 입력·수정도 가능합니다.
