@@ -1,0 +1,5 @@
+// Local preview only. Hosted runtime uses the real Sites D1 binding.
+import {createServer} from 'node:http';import {mkdirSync} from 'node:fs';import {database} from '../tests/d1.mjs';import worker from '../dist/server/index.js';
+mkdirSync('.sites-runtime',{recursive:true});const DB=database('.sites-runtime/preview.sqlite');
+const args=process.argv.slice(2);const port=Number(args[args.indexOf('--port')+1]||process.env.PORT||3000),host=args[args.indexOf('--host')+1]||'0.0.0.0';
+createServer(async(req,res)=>{try{const chunks=[];for await(const chunk of req)chunks.push(chunk);const body=Buffer.concat(chunks);const origin=req.headers.origin||`${req.headers['x-forwarded-proto']||'http'}://${req.headers.host}`;const response=await worker.fetch(new Request(new URL(req.url,origin),{method:req.method,headers:req.headers,...(body.length?{body}:{}),duplex:'half'}),{DB});res.writeHead(response.status,Object.fromEntries(response.headers));res.end(Buffer.from(await response.arrayBuffer()));}catch{res.writeHead(500);res.end('Preview error');}}).listen(port,host,()=>console.log(`Local: http://${host}:${port}`));

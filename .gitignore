@@ -3,4 +3,4 @@ node_modules/
 .dev.vars*
 .sites-runtime/
 .wrangler/
-outputs/
+worker/assets.js
