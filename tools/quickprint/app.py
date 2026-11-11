@@ -2,7 +2,7 @@ import sys, tempfile, traceback, ctypes
 from ctypes import wintypes
 from pathlib import Path
 from PySide6.QtCore import QThread, Signal, QAbstractNativeEventFilter, QTimer
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QListWidget, QComboBox, QFileDialog, QMessageBox, QTextEdit
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QListWidget, QComboBox, QFileDialog, QMessageBox, QTextEdit, QSystemTrayIcon, QMenu, QStyle
 
 SUPPORTED = {'.pdf', '.hwp', '.hwpx', '.xls', '.xlsx', '.xlsm'}
 
@@ -159,7 +159,7 @@ class Window(QWidget):
     def __init__(self):
         super().__init__()
         self.worker = None
-        self.setWindowTitle('간편 인쇄 1.0.6')
+        self.setWindowTitle('간편 인쇄 1.0.7')
         self.resize(760, 640)
         self.setAcceptDrops(True)
         layout = QVBoxLayout(self)
@@ -321,17 +321,62 @@ class Window(QWidget):
     def cancel(self):
         self.worker.cancelled = True
         self.logs.append('중지 요청: 현재 페이지/변환이 끝나면 멈춥니다. 전송된 작업은 프린터 대기열에서 취소하세요.')
-    def closeEvent(self,event):
+    def open_window(self):
+        self.showNormal()
+        self.raise_()
+        self.activateWindow()
+    def setup_tray(self):
+        self.tray = QSystemTrayIcon(self)
+        self.tray.setIcon(self.style().standardIcon(QStyle.SP_ComputerIcon))
+        self.tray.setToolTip('간편 인쇄 · Ctrl+Alt+P로 목록 추가')
+        self.tray_menu = QMenu(self)
+        self.tray_menu.addAction('간편 인쇄 열기', self.open_window)
+        self.tray_menu.addSeparator()
+        self.tray_menu.addAction('완전히 종료', self.quit_app)
+        self.tray.setContextMenu(self.tray_menu)
+        self.tray.activated.connect(self.tray_activated)
+        self.tray.show()
+    def tray_activated(self, reason):
+        if reason in (QSystemTrayIcon.Trigger, QSystemTrayIcon.DoubleClick):
+            self.open_window()
+    def quit_app(self):
         if self.worker and self.worker.isRunning():
-            self.cancel()
+            self.open_window()
+            QMessageBox.information(self, '인쇄 처리 중', '중지 버튼을 누르고 처리가 끝난 뒤 종료하세요.')
+            return
+        self.unregister_hotkey()
+        self.tray.hide()
+        QApplication.instance().quit()
+    def closeEvent(self,event):
+        if QSystemTrayIcon.isSystemTrayAvailable():
             event.ignore()
-            QMessageBox.information(self,'인쇄 처리 중','중지를 요청했습니다. 처리가 끝나면 창을 닫아주세요.')
+            self.hide()
+        elif self.worker and self.worker.isRunning():
+            event.ignore()
+            QMessageBox.information(self, '인쇄 처리 중', '처리가 끝난 뒤 종료하세요.')
         else:
             event.accept()
+            QApplication.instance().quit()
 
 if __name__ == '__main__':
+    # Retain the handle for the process lifetime to prevent duplicate startup copies.
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.CreateMutexW.argtypes = [ctypes.c_void_p, wintypes.BOOL, wintypes.LPCWSTR]
+    kernel.CreateMutexW.restype = wintypes.HANDLE
+    instance_mutex = kernel.CreateMutexW(None, False, 'Local\\EunQuickPrint')
+    already_running = ctypes.get_last_error() == 183
     app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
+    if not instance_mutex:
+        QMessageBox.warning(None, '간편 인쇄', '프로그램 실행 상태를 확인하지 못했습니다.')
+        sys.exit(1)
+    if already_running:
+        if '--tray' not in sys.argv:
+            QMessageBox.information(None, '간편 인쇄', '이미 실행 중입니다. 작업표시줄 오른쪽 숨겨진 아이콘에서 간편 인쇄를 누르세요.')
+        sys.exit(0)
     app.setStyleSheet('QWidget{font-family:"Malgun Gothic";font-size:13px;} QPushButton{padding:10px;} QListWidget,QTextEdit{background:#f7f9fc;border:1px solid #d5dce8;border-radius:6px;}')
     window = Window()
-    window.show()
+    window.setup_tray()
+    if '--tray' not in sys.argv or not QSystemTrayIcon.isSystemTrayAvailable():
+        window.show()
     sys.exit(app.exec())
