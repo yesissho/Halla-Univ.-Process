@@ -35,12 +35,7 @@ try {
     $shortcut.Arguments = '"' + (Join-Path $root 'app.py') + '"'
     $shortcut.WorkingDirectory = $root
     $shortcut.Save()
-    $startup = $shell.CreateShortcut((Join-Path ([Environment]::GetFolderPath('Startup')) 'Quick Print.lnk'))
-    $startup.TargetPath = $shortcut.TargetPath
-    $startup.Arguments = $shortcut.Arguments + ' --tray'
-    $startup.WorkingDirectory = $root
-    $startup.Save()
-    Write-Host 'Installation complete. Quick Print starts in the system tray at Windows sign-in.' 
+    Write-Host 'Installation complete. Desktop: Quick Print'
     Start-Process (Join-Path $runtime 'pythonw.exe') -ArgumentList ('"' + (Join-Path $root 'app.py') + '"')
 } catch {
     Write-Host $_ -ForegroundColor Red
