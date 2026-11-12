@@ -91,7 +91,7 @@ function Clean-Name($name) {
  if($s.Length -gt 150){$s=$s.Substring(0,150).TrimEnd()}; return $s
 }
 $form=New-Object Windows.Forms.Form
-$form.Text='스캔 문서 이름 정리 v1.8'; $form.Size=New-Object Drawing.Size(1080,680); $form.MinimumSize=New-Object Drawing.Size(850,550); $form.StartPosition='CenterScreen'; $form.Font=New-Object Drawing.Font('맑은 고딕',10)
+$form.Text='스캔 문서 이름 정리 v1.9'; $form.Size=New-Object Drawing.Size(1080,680); $form.MinimumSize=New-Object Drawing.Size(850,550); $form.StartPosition='CenterScreen'; $form.Font=New-Object Drawing.Font('맑은 고딕',10)
 if(Test-Path "$PSScriptRoot\App.ico"){$form.Icon=New-Object Drawing.Icon("$PSScriptRoot\App.ico")}
 $header=New-Object Windows.Forms.Label; $header.Text='스캔 문서 이름 정리'; $header.Font=New-Object Drawing.Font('맑은 고딕',20,[Drawing.FontStyle]::Bold); $header.SetBounds(24,20,800,45); $form.Controls.Add($header)
 $desc=New-Object Windows.Forms.Label; $desc.Text='SCAN_ 파일 불러오기 → 변경할 파일 체크 → 파일명 확인 → 변경'; $desc.SetBounds(26,73,990,28); $form.Controls.Add($desc)
